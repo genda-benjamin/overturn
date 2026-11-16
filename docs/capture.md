@@ -23,6 +23,22 @@ Overturn failing never blocks the send. The run page links back to the ticket.
 
 Source: [`packages/zendesk-app`](https://github.com/overturn-ai/overturn/tree/main/packages/zendesk-app). Front, Salesforce Service Cloud and Gmail follow the same shape.
 
+## Intercom (Canvas Kit)
+
+The Overturn app sits in the conversation details. Canvas Kit never shows an app the reply composer, so this one records a draft only when it was told: a drafting agent that recorded its run with the SDK (`externalId: "ic:<conversation id>"`) is found by itself, and otherwise the teammate names the draft they can see ("Fin or another AI assist", "I wrote it myself", "Not sure"). The tag on the run is exactly that answer — `draft:ai`, `draft:manual`, or `draft:unknown` when they did not say. Intercom's own `author.is_ai_answer` and `ai_agent_participated` flags are shown as evidence on the panel and only ever upgrade a teammate's "an assist wrote it"; a draft nobody told us about is `unknown`.
+
+1. Create a project API key in Overturn (Settings → API keys).
+2. Build it (`pnpm --filter @overturn-ai/intercom-app build` → `dist/overturn-intercom-app.zip`) and host `dist/app`: a Cloudflare Worker (`worker.mjs`) or `node dist/app/server.mjs`.
+3. Developer Hub → **New App** → **Configure → Canvas Kit → For teammates → Within the Conversation Details**, with the Initialize and Submit flow webhook URLs both at `https://<your-host>/intercom/initialize` and `https://<your-host>/intercom/submit`. Set `OVERTURN_API_KEY` and `INTERCOM_CLIENT_SECRET` (the app checks Intercom's `X-Body-Signature` HMAC); `INTERCOM_ACCESS_TOKEN` is optional and reads a partial conversation back at `display_as=plaintext`. `agent`, `reason_pack`, `require_reason`, `capture_notes`, `min_draft_chars`, `scope_tag`, `decision_fields` and `overturn_base_url` work as they do for Zendesk.
+
+What the teammate sees:
+
+- **Draft inserted · 112 words** as soon as a recorded run or a named draft is known, with one line saying where the tag came from ("recorded with the Overturn SDK", "you said an assist wrote it", "you said you wrote it", "nobody said who wrote it").
+- A **reason** picker (`reason_pack`, `support` by default) with an optional note, and **what you sent**, read from the conversation and editable.
+- On **Record the fix**, sent as drafted is an approve; changed is an edit, with the reason as the case title. `require_reason` holds the capture, not the send: Intercom gives an app no hook that could hold a send, so an unexplained change is simply not recorded and the panel asks for one click.
+
+Source: [`packages/intercom-app`](https://github.com/overturn-ai/overturn/tree/main/packages/intercom-app). Salesforce Service Cloud and Gmail follow the same shape.
+
 ## Any other tool: `POST /v1/capture`
 
 ```http

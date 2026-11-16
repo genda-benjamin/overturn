@@ -1,0 +1,15 @@
+{
+  "//": "Copy to config.json (gitignored) or set the same values as environment variables. Secrets: overturn_api_key and intercom_token.",
+  "overturn_api_key": "ov_live_...",
+  "overturn_base_url": "https://api.overturn.run",
+  "agent": "support-reply",
+  "reason_pack": "support",
+  "require_reason": "true",
+  "capture_notes": "false",
+  "min_draft_chars": "80",
+  "scope_tag": "",
+  "max_context_parts": "40",
+  "decision_fields": "",
+  "intercom_token": "",
+  "intercom_api_base": "https://api.intercom.io"
+}
